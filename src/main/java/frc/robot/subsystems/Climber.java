@@ -8,33 +8,32 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
 
-import frc.robot.lib.LazySparkMax;
-import frc.robot.lib.SparkMaxFactory;
 import frc.robot.lib.DigitalServo;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANPIDController;
-import com.revrobotics.ControlType;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 public class Climber extends SubsystemBase {
     /**
      * Creates a new ExampleSubsystem.
      */
-    private final LazySparkMax ClimberMotor;
+    private final CANSparkMax ClimberMotor;
     private final TalonSRX Skywalker;
     private final DigitalServo RachetServo;
 
     private final DigitalInput TopLimit;
     private final DigitalInput BottomLimit;
 
-    private final CANEncoder ClimbEncoder;
-    private final CANPIDController ClimbPID;
+    private final RelativeEncoder ClimbEncoder;
+    private final SparkMaxPIDController ClimbPID;
 
     public Climber() {
-        ClimberMotor = SparkMaxFactory.createDefaultSparkMax(Constants.Climber_ID);
+        ClimberMotor = new CANSparkMax(Constants.Climber_ID, MotorType.kBrushless);
 
         ClimbEncoder = ClimberMotor.getEncoder();
         ClimbPID = ClimberMotor.getPIDController();
@@ -52,27 +51,27 @@ public class Climber extends SubsystemBase {
     }
 
     public void Climber_toHook(){
-        ClimberMotor.set(ControlType.kPosition, 177);
+        ClimbPID.setReference(177, CANSparkMax.ControlType.kPosition);
     }
 
     public void Climber_Forward(){
         if(ClimberMotor.getOutputCurrent() < 18){
             if(ClimbEncoder.getPosition() > 150){
-                ClimberMotor.set(ControlType.kDutyCycle, Constants.FWDClimberSlowSpeed);
+                ClimberMotor.set(Constants.FWDClimberSlowSpeed);
             }else{
-                ClimberMotor.set(ControlType.kDutyCycle, Constants.FWDClimberSpeed);
+                ClimberMotor.set(Constants.FWDClimberSpeed);
             }
         }else{
-            ClimberMotor.set(ControlType.kDutyCycle, 0.0);
+            ClimberMotor.set(0.0);
         }
 
     }
 
     public void Climber_Reverse(){
         if(ClimbEncoder.getPosition() < 60){
-            ClimberMotor.set(ControlType.kDutyCycle, Constants.RVSClimberSlowSpeed);
+            ClimberMotor.set(Constants.RVSClimberSlowSpeed);
         }else{
-            ClimberMotor.set(ControlType.kDutyCycle, Constants.RVSClimberSpeed);
+            ClimberMotor.set(Constants.RVSClimberSpeed);
         }
     }
 
@@ -81,15 +80,15 @@ public class Climber extends SubsystemBase {
     }
     
     public void ClimberFWDSlow(){
-         ClimberMotor.set(ControlType.kDutyCycle, 0.5);
+         ClimberMotor.set(0.5);
      }
 
     public void ClimberRVSSlow(){
-         ClimberMotor.set(ControlType.kDutyCycle, -0.5);
+         ClimberMotor.set(-0.5);
      }
 
     public void Climber_Stop(){
-        ClimberMotor.set(ControlType.kDutyCycle, 0.0);
+        ClimberMotor.set(0.0);
     }
 
     public void RachetServo_Home(){

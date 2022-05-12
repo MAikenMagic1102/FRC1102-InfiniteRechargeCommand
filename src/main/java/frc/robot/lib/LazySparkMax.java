@@ -1,6 +1,6 @@
 package frc.robot.lib;
 
-import com.revrobotics.CANError;
+import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 
@@ -24,7 +24,7 @@ public class LazySparkMax extends CANSparkMax {
     }
 
     @Override
-    public CANError follow(final CANSparkMax leader) {
+    public REVLibError follow(final CANSparkMax leader) {
         mLeader = leader;
         return super.follow(leader);
     }

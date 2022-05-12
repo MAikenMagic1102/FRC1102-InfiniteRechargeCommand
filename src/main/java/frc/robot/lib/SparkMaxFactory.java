@@ -1,6 +1,6 @@
 package frc.robot.lib;
 
-import com.revrobotics.CANError;
+import com.revrobotics.REVLibError;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel;
@@ -44,8 +44,8 @@ public class SparkMaxFactory {
         return createSparkMax(id, kDefaultConfiguration);
     }
 
-    private static void handleCANError(int id, CANError error, String message) {
-        if (error != CANError.kOk) {
+    private static void handleCANError(int id, REVLibError error, String message) {
+        if (error != REVLibError.kOk) {
             DriverStation.reportError(
                     "Could not configure spark id: " + id + " error: " + error.toString() + " " + message, false);
         }
@@ -65,7 +65,7 @@ public class SparkMaxFactory {
 
         //sparkMax.restoreFactoryDefaults(config.BURN_FACTORY_DEFAULT_FLASH);
 
-        sparkMax.set(ControlType.kDutyCycle, 0.0);
+        sparkMax.set(0.0);
 
         handleCANError(id, sparkMax.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus0, config.STATUS_FRAME_0_RATE_MS), "set status0 rate");
         handleCANError(id, sparkMax.setPeriodicFramePeriod(CANSparkMaxLowLevel.PeriodicFrame.kStatus1, config.STATUS_FRAME_1_RATE_MS), "set status1 rate");

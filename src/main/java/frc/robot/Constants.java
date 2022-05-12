@@ -34,13 +34,16 @@ public final class Constants {
 
     public static final int FeederMotor_ID = 9;
     public static final double Feeder_kF = 0.0006;
-    public static final double Feeder_kP = 0.00025;
-    public static final int FeederSpeed = 135;
+    public static final double Feeder_kP = 0.0002;
+    public static final int FeederSpeed = 110;
     public static final int ReverseFeederSpeed = -130;
     public static final int FeederShootSpeed = 550;
 
+    public static final int AntiJam_ID = 1;
+    public static final double AntiJamSpeed = 1.0;
+
     public static final int Intake_ID = 10;
-    public static final double FWDIntakeSpeed = 0.58;
+    public static final double FWDIntakeSpeed = 0.8;
     public static final double RVSIntakeSpeed = -0.6;
     
     public static final int Climber_ID = 8;
@@ -64,20 +67,20 @@ public final class Constants {
     public static final int MagnetSensor_DIO = 0;
 
     public static final int Shooter_ID = 20;
-    public static final double Shooter_kF_LOW = 0.0004;
-    public static final double Shooter_kP_LOW = 0.00016;
+    public static final double Shooter_kF_LOW = 0.135;
+    public static final double Shooter_kP_LOW = 0.0492;
 
-    public static final double Shooter_kF = 0.135;
-    public static final double Shooter_kP = 0.7;
-    public static final double Shooter_RampRate = 0.5;
+    public static double Shooter_kF = 0.04;
+    public static double Shooter_kP = 0.01;//.0492;
+    //public static final double Shooter_RampRate = 0.7;
 
     public static final int ShooterSpeedClose = 3000;
-    public static final int ShooterSpeedAuto = 4500;
+    public static final int ShooterSpeedAuto = 3900;
     public static final int ShooterSpeedTrench = 5000;
     public static final int ShooterSpeedFar = 5500;
 
     public static final int ShooterHood_ID = 15;
-    public static final double Hood_kP = 0.6;
+    public static final double Hood_kP = 0.95;
     public static final double Hood_kD = 0.0;
 
     public static final double HoodAngleAuto = 0;
@@ -86,8 +89,8 @@ public final class Constants {
     public static final double HoodAngleFar = 0;
 
     public static final int Turret_ID = 14;
-    public static final double Turret_kP = 0.075;
-    public static final double Turret_kD = 0.0;
+    public static final double Turret_kP = 0.07;
+    public static final double Turret_kD = 0.0057;
     public static final int TurnLimit_DIO = 3;
 
 

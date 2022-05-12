@@ -11,7 +11,7 @@ import frc.robot.lib.SparkMaxFactory;
 
 import frc.robot.lib.geometry.Twist2d;
 import frc.robot.lib.util.*;
-import edu.wpi.first.wpilibj.SlewRateLimiter;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Drivetrain extends SubsystemBase {
@@ -20,14 +20,13 @@ public class Drivetrain extends SubsystemBase {
 
   private final LazySparkMax LeftDriveMaster, RightDriveMaster, LeftSlave1, LeftSlave2, RightSlave1, RightSlave2;
 
-  private SlewRateLimiter speedLimiter = new SlewRateLimiter(3);
-  private SlewRateLimiter rotLimiter = new SlewRateLimiter(3);
+  private SlewRateLimiter speedLimiter = new SlewRateLimiter(2.7);
+  private SlewRateLimiter rotLimiter = new SlewRateLimiter(2.7);
 
   private void configureSpark(LazySparkMax sparkMax, boolean left, boolean master) {
     sparkMax.setInverted(!left);
-    sparkMax.setIdleMode(IdleMode.kBrake);
+    sparkMax.setIdleMode(IdleMode.kCoast);
     sparkMax.setSmartCurrentLimit(40);
-    sparkMax.enableVoltageCompensation(12.0);
     sparkMax.setClosedLoopRampRate(Constants.kDriveVoltageRampRate);
   }
 
@@ -65,10 +64,10 @@ public class Drivetrain extends SubsystemBase {
         sing = 1;
     }
    
-    if (input < .15){
+    if (Math.abs(input) < .15){
         out = 0;
     }else{
-        if(input < .90){
+        if(Math.abs(input) < .80){
             out = input * 0.55;
         }else {
             out = input;
@@ -82,16 +81,19 @@ public class Drivetrain extends SubsystemBase {
 
   public void ArcadeOpenLoop(double magnitude, double rotation){
 
+    magnitude = speedLimiter.calculate(magnitude * 0.4);
+    rotation = rotLimiter.calculate(rotation * 0.4);
+
     double leftPower =  magnitude - rotation;
     double rightPower = magnitude + rotation;
 
-    RightDriveMaster.set(drive_math(rightPower));
-    LeftDriveMaster.set(drive_math(leftPower));
+    RightDriveMaster.set((rightPower));
+    LeftDriveMaster.set((leftPower));
   }
 
   public void setOpenLoop(DriveSignal signal) {
-      LeftDriveMaster.set(ControlType.kDutyCycle, signal.getLeft());
-      RightDriveMaster.set(ControlType.kDutyCycle, signal.getRight());
+      LeftDriveMaster.set(signal.getLeft());
+      RightDriveMaster.set(signal.getRight());
   }
 
   public void setCheesyishDrive(double throttle, double wheel, boolean quickTurn) {
@@ -126,5 +128,6 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    
   }
 }

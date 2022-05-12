@@ -10,8 +10,8 @@ package frc.robot.lib;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.PWM;
-import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SendableRegistry;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.util.sendable.SendableRegistry;
 
 /**
  * Standard hobby style servo.

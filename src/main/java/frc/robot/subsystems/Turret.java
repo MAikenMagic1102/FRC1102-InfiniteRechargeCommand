@@ -6,10 +6,13 @@ import frc.robot.lib.Limelight;
 import frc.robot.lib.Limelight.LightMode;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.math.controller.PIDController;
 
 import frc.robot.Constants;
 
 import frc.robot.lib.AS5600Encoder;
+
+import javax.naming.LimitExceededException;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -20,6 +23,7 @@ public class Turret extends SubsystemBase {
     private final TalonSRX turret;
     private final AS5600Encoder turretEncoder;
     private final Limelight limelight;
+    private final PIDController turretPID;
     //private final DigitalInput turnlimit;
 
 
@@ -28,6 +32,7 @@ public class Turret extends SubsystemBase {
         turretEncoder = new AS5600Encoder(turret.getSensorCollection());
         limelight = new Limelight();
         limelight.setLedMode(LightMode.eOff);
+        turretPID = new PIDController(Constants.Turret_kP, 0, Constants.Turret_kD);
         //turnlimit = new DigitalInput(Constants.TurnLimit_DIO);
 
     }
@@ -35,10 +40,11 @@ public class Turret extends SubsystemBase {
     public void turret_LimelightControl(double input){
         limelight.setLedMode(LightMode.eOn);
         if(limelight.isTarget()){
-            double turretOutput = limelight.getTx() * Constants.Turret_kP;
+            double turretOutput = limelight.getTx() * Constants.Turret_kP + Constants.Turret_kD;
                 turret.set(ControlMode.PercentOutput, turretOutput);
         }else{
-            turret.set(ControlMode.PercentOutput, input);
+            if(0.18 > Math.abs(input))
+                turret.set(ControlMode.PercentOutput, input);
         }
     }
 
@@ -59,10 +65,15 @@ public class Turret extends SubsystemBase {
         turret.set(ControlMode.PercentOutput, rotation * 0.5);
     }
 
+    public double GetTurretLimelightDist(){
+        return limelight.getDistance();
+    }
+
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Distance Inches", limelight.getDistance());
         SmartDashboard.putNumber("Turret Position", turretEncoder.getPwmPosition());
+        SmartDashboard.putNumber("Limelight TX", limelight.getTx());
     }
 
 }

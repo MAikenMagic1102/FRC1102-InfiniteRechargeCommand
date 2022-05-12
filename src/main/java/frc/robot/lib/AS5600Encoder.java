@@ -1,6 +1,6 @@
 package frc.robot.lib;
 
-import edu.wpi.first.wpilibj.MedianFilter;
+import edu.wpi.first.math.filter.MedianFilter;
 import com.ctre.phoenix.motorcontrol.SensorCollection;
 
 /** * Reads PWM values from the AS5600. */

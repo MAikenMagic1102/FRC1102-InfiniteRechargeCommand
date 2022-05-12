@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 
 /**
@@ -33,7 +33,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    camera1 = CameraServer.getInstance().startAutomaticCapture(0);
+    camera1 = CameraServer.startAutomaticCapture(0);
     camera1.setExposureManual(55);
     camera1.setWhiteBalanceManual(55);
     camera1.setFPS(30);

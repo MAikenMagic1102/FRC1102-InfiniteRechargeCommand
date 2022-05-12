@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.DigitalInput;
-
+//import edu.wpi.first.wpilibj.motorcontrol.PWMVictorSPX;
 import frc.robot.Constants;
 
 import frc.robot.lib.LazySparkMax;
@@ -12,10 +12,11 @@ import frc.robot.lib.SparkMaxFactory;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-
-import com.revrobotics.CANEncoder;
-import com.revrobotics.CANPIDController;
-import com.revrobotics.ControlType;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxAlternateEncoder;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
+import com.revrobotics.SparkMaxRelativeEncoder.Type;
 
 public class Feeder extends SubsystemBase {
     /**
@@ -27,12 +28,16 @@ public class Feeder extends SubsystemBase {
     private final DigitalInput MagnetSensor;
 
     private final LazySparkMax feederMotor;
-    private final CANEncoder feederEncoder;
-    private final CANPIDController feederPID;
+    private final RelativeEncoder feederEncoder;
+    private final SparkMaxPIDController feederPID;
+
+    // final PWMVictorSPX antijamRoller;
+    private final LazySparkMax antijamRoller;
 
     private boolean AutoFirstRun = false;
     private boolean armed = false;
     private boolean firing = false;
+    private double feederpos;
 
     private final Timer m_Timer;
     private final Timer m_ShootTimer;
@@ -41,10 +46,10 @@ public class Feeder extends SubsystemBase {
         feederMotor = SparkMaxFactory.createDefaultSparkMax(Constants.FeederMotor_ID);
         feederMotor.setInverted(true);
         feederPID = feederMotor.getPIDController();
-        feederEncoder = feederMotor.getEncoder();
-
+        feederEncoder = feederMotor.getEncoder(Type.kHallSensor, 42);
+        feederEncoder.setMeasurementPeriod(1);
         feederEncoder.setPosition(0);
-
+        feederEncoder.setPositionConversionFactor(42);
         feederPID.setP(Constants.Feeder_kP);
         feederPID.setFF(Constants.Feeder_kF);
         feederMotor.burnFlash();
@@ -53,6 +58,10 @@ public class Feeder extends SubsystemBase {
         MainFeed = new TalonSRX(Constants.MainFeeder_ID);
 
         MagnetSensor = new DigitalInput(Constants.MagnetSensor_DIO);
+        //antijamRoller = new PWMVictorSPX(1);
+        antijamRoller = SparkMaxFactory.createDefaultSparkMax(Constants.AntiJam_ID);
+
+        antijamRoller.setInverted(true);
 
         m_Timer = new Timer();
         m_Timer.reset();
@@ -63,10 +72,16 @@ public class Feeder extends SubsystemBase {
 
     public void AutoFeeder(){
 
+        antijamRoller.set(.5);
+       
+
+
+
+
         Feeder_Forward();
         
-        if(feederMotor.getOutputCurrent() > 38 && AutoFirstRun == true){
-            feederMotor.set(ControlType.kDutyCycle, -0.05);
+        if(feederMotor.getOutputCurrent() > 32 && AutoFirstRun == true){
+            feederMotor.set(-0.05);
             if(m_Timer.get() == 0){
                 m_Timer.start();
             }
@@ -81,22 +96,24 @@ public class Feeder extends SubsystemBase {
     }
 
     public void Feeder_Forward(){
-        feederMotor.set(ControlType.kVelocity, Constants.FeederSpeed);
+        feederPID.setReference(Constants.FeederSpeed, ControlType.kVelocity);
     }
 
     public void FeederShoot(){
-        feederMotor.set(ControlType.kVelocity, Constants.FeederShootSpeed);
+        feederPID.setReference(Constants.FeederShootSpeed, ControlType.kVelocity);
     }
 
     public void Feeder_Reverse(){
-        feederMotor.set(ControlType.kVelocity, Constants.ReverseFeederSpeed);
+        feederPID.setReference(Constants.ReverseFeederSpeed, ControlType.kVelocity);
     }
 
     public void Feeder_Stop(){
         feederMotor.set(ControlType.kDutyCycle, 0.0);
+        antijamRoller.set(0);
     }
 
     public void PreShoot(){
+        
         if(MagnetSensor.get() == true && !armed){
             feederMotor.set(ControlType.kDutyCycle, 0.1);
         }else{
@@ -118,13 +135,15 @@ public class Feeder extends SubsystemBase {
                 }
             }
         }
+        
     }
 
     public void Shoot(boolean ShooterReady){
         if(firing && ShooterReady){
+            firing = true;
             SubFeed.set(ControlMode.PercentOutput, -1.0);
             MainFeed.set(ControlMode.PercentOutput, -1.0);
-            feederMotor.set(ControlType.kVelocity, 550);
+            feederMotor.set(ControlType.kVelocity, 450);
         }
     }
 
@@ -145,9 +164,17 @@ public class Feeder extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putBoolean("armed", armed);
         SmartDashboard.putBoolean("firing", firing);
-
+        SmartDashboard.putNumber("Revolver RAW Position", feederpos);
         SmartDashboard.putBoolean("MagnetSensor", MagnetSensor.get());
-      // This method will be called once per scheduler run
+        SmartDashboard.putNumber("Feeder Current Draw", feederMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Feeder Current Speed", feederEncoder.getVelocity());
+        // if(feederpos > 639){ ////If the revolver has gone around more than once and feederpos is over 640
+        //     feederEncoder.setPosition(0); //Set back to zero to represent a complete revolution. 
+        // }
+        // feederpos = feederEncoder.getPosition();
+        // double curr = feederpos/128; //Maximum per revolution 640, with five possible slots. Divide by 128.
+        // //if(curr % 1 == 0) curr+=1; //If the value is between two whole numbers, it is in the middle of a slot. Add one to it to "bump it up" to the proper slot so this doesn't start at zero, and also to help round. (The double truncates down when it is cast to an int later on.)
+        // SmartDashboard.putNumber("Current Revolver Slot", (int)curr + 1); //Truncate down the double to the whole int below it
     }
-  }
-  
+}
+

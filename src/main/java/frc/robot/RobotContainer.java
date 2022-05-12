@@ -8,7 +8,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
-
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 
@@ -46,8 +46,10 @@ public class RobotContainer {
   private final Shooter m_Shooter = new Shooter();
   private final Turret m_Turret = new Turret();
 
-  private final XboxController m_Driver = new XboxController(0);
-  private final XboxController m_Operator = new XboxController(1);
+  private final Joystick m_Driver_1 = new Joystick(0);
+  private final Joystick m_Driver_2 = new Joystick(1);
+  private final Joystick m_DemoOperator = new Joystick(3);
+  private final XboxController m_Operator = new XboxController(2);
 
   private final CommandBase m_autonomousCommand = new Autonomous(m_Drivetrain, m_Feeder, m_Climber, m_Shooter, m_Turret);
 
@@ -61,21 +63,21 @@ public class RobotContainer {
     m_Drivetrain.setDefaultCommand(
       new DefaultDrive(
         m_Drivetrain, 
-        () -> m_Driver.getRawAxis(1) * -1, 
-        () -> m_Driver.getRawAxis(4) * -1));
+        () -> m_Driver_1.getRawAxis(1) * -1, 
+        () -> m_Driver_2.getRawAxis(2) * -1));
 
 
     m_Feeder.setDefaultCommand(
       new AutoFeeder(m_Feeder));
 
     m_Shooter.setDefaultCommand(
-      new RunCommand(() -> m_Shooter.ShooterHood_OpenLoop(m_Operator.getRawAxis(1) * -1), m_Shooter)); 
+      new RunCommand(() -> m_Shooter.ShooterHood_OpenLoop(m_Operator.getRawAxis(1)), m_Shooter)); 
 
     m_Turret.setDefaultCommand(
-      new RunCommand(() -> m_Turret.Rotate_OpenLoop(m_Operator.getRawAxis(4)), m_Turret));  
+      new RunCommand(() -> m_Turret.Rotate_OpenLoop(m_Operator.getRawAxis(2)), m_Turret));  
 
-    m_Climber.setDefaultCommand(
-      new RunCommand(() -> m_Climber.Skywalker_Control(m_Operator.getRawAxis(0) * -1), m_Climber));
+     m_Climber.setDefaultCommand(
+       new RunCommand(() -> m_Climber.Skywalker_Control(m_Operator.getRawAxis(0) * -1), m_Climber));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -93,37 +95,37 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
 
-    new JoystickButton(m_Driver, Button.kBumperLeft.value)
+    new JoystickButton(m_Driver_1, 1)
       .whenPressed(new InstantCommand(m_Intake::Intake_Forward, m_Intake))
       .whenReleased(new InstantCommand(m_Intake::Intake_Stop, m_Intake));
 
-    new JoystickButton(m_Driver, Button.kBumperRight.value)
+    new JoystickButton(m_Driver_2, 1)
       .whenPressed(new InstantCommand(m_Intake::Intake_Reverse, m_Intake))
       .whenReleased(new InstantCommand(m_Intake::Intake_Stop, m_Intake));
 
-    new JoystickButton(m_Driver, Button.kX.value)
+    new JoystickButton(m_Driver_1, 11)
       .whenPressed(new InstantCommand(m_Climber::RachetServo_Home, m_Climber));
      
-    new JoystickButton(m_Driver, Button.kB.value)
+    new JoystickButton(m_Driver_1, 12)
       .whenPressed(new InstantCommand(m_Climber::RachetServo_Lock, m_Climber));  
 
-    new JoystickButton(m_Driver, Button.kStart.value)
+    new JoystickButton(m_Driver_2, 5)
       .whenPressed(new InstantCommand(m_Climber::Climber_Forward, m_Climber))
       .whenReleased(new InstantCommand(m_Climber::Climber_Stop, m_Climber)); 
 
-    new JoystickButton(m_Driver, Button.kY.value)
+    new JoystickButton(m_Driver_2, 4)
       .whenPressed(new InstantCommand(m_Climber::Climber_toHook, m_Climber))
       .whenReleased(new InstantCommand(m_Climber::Climber_Stop, m_Climber)); 
 
-    new JoystickButton(m_Driver, Button.kA.value)
+    new JoystickButton(m_Driver_2, 3)
       .whenPressed(new InstantCommand(m_Climber::Climber_Reverse, m_Climber))
       .whenReleased(new InstantCommand(m_Climber::Climber_Stop, m_Climber)); 
 
-    new JoystickButton(m_Operator, Button.kBumperLeft.value)
-      .whenPressed(new InstantCommand(m_Shooter::Shooter_Spinup, m_Shooter))
-      .whenPressed(new RunCommand(() -> m_Turret.turret_LimelightControl(m_Operator.getRawAxis(4)), m_Turret))
-      .whenReleased(new InstantCommand(m_Shooter::Shooter_Stop, m_Shooter))
-      .whenReleased(new InstantCommand(m_Turret::turret_Stop, m_Turret));
+    // new JoystickButton(m_Operator, Button.kBumperLeft.value)
+    //   .whileHeld(new RunCommand(() -> m_Shooter.Shooter_Spinup(m_Turret.GetTurretLimelightDist()), m_Shooter))
+    //   //.whenPressed(new RunCommand(() -> m_Turret.turret_LimelightControl(m_Operator.getRawAxis(4)), m_Turret))
+    //   .whenReleased(new InstantCommand(m_Shooter::Shooter_Stop, m_Shooter))
+    //   .whenReleased(new InstantCommand(m_Turret::turret_Stop, m_Turret));
 
     new JoystickButton(m_Operator, Button.kY.value)
       .whenPressed(new InstantCommand(m_Shooter::Shooter_OpenLoop, m_Shooter))
@@ -137,12 +139,15 @@ public class RobotContainer {
       .whenPressed(new RunCommand(() -> m_Shooter.ShooterHood_toPosition(55), m_Shooter))
       .whenReleased(new InstantCommand(m_Shooter::ShooterHood_Stop, m_Shooter));       
 
-    new JoystickButton(m_Operator, Button.kBumperRight.value)
+    new JoystickButton(m_Operator, Button.kRightBumper.value)
       .whileHeld(new InstantCommand(m_Feeder::PreShoot, m_Feeder))
+      .whileHeld(new RunCommand(() -> m_Shooter.Shooter_Spinup(m_Turret.GetTurretLimelightDist()), m_Shooter))
       //.whileHeld(new InstantCommand(m_Feeder::FeederShoot, m_Feeder))
+      .whenReleased(new InstantCommand(m_Shooter::Shooter_Stop, m_Shooter))
+      .whenReleased(new InstantCommand(m_Turret::turret_Stop, m_Turret))
       .whenReleased(new InstantCommand(m_Feeder::ShooterFeedStop, m_Feeder));
 
-    new JoystickButton(m_Operator, Button.kA.value)
+    new JoystickButton(m_Operator, 1)
       .whileHeld(new RunCommand(() -> m_Feeder.Shoot(m_Shooter.Shooter_Ready()), m_Feeder))
       //.whileHeld(new InstantCommand(m_Feeder::FeederShoot, m_Feeder))
       .whenReleased(new InstantCommand(m_Feeder::ShooterFeedStop, m_Feeder));

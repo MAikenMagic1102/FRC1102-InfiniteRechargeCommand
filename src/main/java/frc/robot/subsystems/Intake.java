@@ -7,8 +7,6 @@ import frc.robot.Constants;
 import frc.robot.lib.LazySparkMax;
 import frc.robot.lib.SparkMaxFactory;
 
-import com.revrobotics.ControlType;
-
 public class Intake extends SubsystemBase {
     /**
      * Creates a new ExampleSubsystem.
@@ -20,15 +18,15 @@ public class Intake extends SubsystemBase {
     }
 
     public void Intake_Forward(){
-        IntakeMotor.set(ControlType.kDutyCycle, Constants.FWDIntakeSpeed);
+        IntakeMotor.set(Constants.FWDIntakeSpeed);
     }
 
     public void Intake_Reverse(){
-        IntakeMotor.set(ControlType.kDutyCycle, Constants.RVSIntakeSpeed);
+        IntakeMotor.set(Constants.RVSIntakeSpeed);
     }
 
     public void Intake_Stop(){
-        IntakeMotor.set(ControlType.kDutyCycle, 0.0);
+        IntakeMotor.set(0.0);
     }
   
     @Override
